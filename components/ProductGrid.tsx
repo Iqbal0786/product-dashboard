@@ -33,13 +33,11 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
       products = products.filter((product) => product.category === selectedCategory);
     }
     
-    // Filter by search query
+    // Filter by search query (title only)
     if (debouncedSearchQuery.trim()) {
       const query = debouncedSearchQuery.toLowerCase();
-      products = products.filter(
-        (product) =>
-          product.title.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query)
+      products = products.filter((product) =>
+        product.title.toLowerCase().includes(query)
       );
     }
     
