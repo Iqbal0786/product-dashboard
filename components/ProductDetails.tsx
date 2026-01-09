@@ -47,7 +47,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           
           <button
             onClick={() => toggleFavorite(product)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/30 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            className=" cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/30 hover:shadow-lg transition-all duration-300 hover:scale-105"
             aria-label={isFavorite(product.id) ? "Remove from favorites" : "Add to favorites"}
           >
             <svg

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Product, Category } from "../app/types/product";
 import { useFavorites } from "../hooks/useFavorites";
+import { useDebounce } from "../hooks/useDebounce";
 
 interface ProductGridProps {
   initialProducts: Product[];
@@ -16,6 +17,8 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
   const { isFavorite, toggleFavorite, favoritesCount, favorites } = useFavorites();
   const [mounted, setMounted] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Handle client-side hydration
   useEffect(() => {
@@ -30,6 +33,16 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
       products = products.filter((product) => product.category === selectedCategory);
     }
     
+    // Filter by search query
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
+      products = products.filter(
+        (product) =>
+          product.title.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query)
+      );
+    }
+    
     // Filter by favorites - use favorites array directly to avoid function dependency
     if (showFavoritesOnly) {
       const favoriteIds = favorites.map(f => f.id);
@@ -37,7 +50,7 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
     }
     
     setFilteredProducts(products);
-  }, [selectedCategory, initialProducts, showFavoritesOnly, favorites]);
+  }, [selectedCategory, initialProducts, showFavoritesOnly, favorites, debouncedSearchQuery]);
 
   const categories: { value: Category; label: string }[] = [
     { value: "all", label: "All Products" },
@@ -49,6 +62,34 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
 
   return (
     <>
+      {/* Search Input */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <svg
+              className="w-5 h-5 text-gray-400 dark:text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search products..."
+            className="w-full pl-12 pr-4 py-3 rounded-full bg-white/60 backdrop-blur-md border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/30 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all duration-300"
+          />
+        </div>
+      </div>
+
       {/* Category Filter */}
       <div className="mb-8">
         <div className="flex flex-wrap gap-3">
@@ -56,7 +97,7 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
             <button
               key={category.value}
               onClick={() => setSelectedCategory(category.value)}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+              className={` cursor-pointer px-6 py-3 rounded-full font-medium transition-all duration-300 ${
                 selectedCategory === category.value
                   ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105"
                   : "bg-white/60 backdrop-blur-md text-gray-700 dark:bg-gray-800/60 dark:text-gray-200 hover:shadow-md hover:scale-105"

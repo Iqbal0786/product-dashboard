@@ -120,7 +120,7 @@ export default function FavoritesList() {
                 e.preventDefault();
                 removeFromFavorites(product.id);
               }}
-              className="absolute top-4 right-4 p-2 rounded-full bg-red-500 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110"
+              className=" cursor-pointer absolute top-4 right-4 p-2 rounded-full bg-red-500 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110"
               aria-label="Remove from favorites"
             >
               <svg
