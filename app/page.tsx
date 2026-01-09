@@ -21,12 +21,20 @@ export default function Home() {
               Product Explorer
             </span>
           </div>
-          <Link
-            href="/products"
-            className="hidden md:block px-6 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 font-medium shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 dark:bg-gray-800/80 dark:text-white"
-          >
-            Browse Products
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/favorites"
+              className="hidden md:block px-6 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 font-medium shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 dark:bg-gray-800/80 dark:text-white"
+            >
+              ❤️ Favorites
+            </Link>
+            <Link
+              href="/products"
+              className="hidden md:block px-6 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 font-medium shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 dark:bg-gray-800/80 dark:text-white"
+            >
+              Browse Products
+            </Link>
+          </div>
         </div>
       </nav>
 

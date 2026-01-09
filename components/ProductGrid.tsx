@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product, Category } from "../app/types/product";
+import { useFavorites } from "../hooks/useFavorites";
 
 interface ProductGridProps {
   initialProducts: Product[];
@@ -12,16 +13,31 @@ interface ProductGridProps {
 export default function ProductGrid({ initialProducts }: ProductGridProps) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts);
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
+  const { isFavorite, toggleFavorite, favoritesCount, favorites } = useFavorites();
+  const [mounted, setMounted] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (selectedCategory === "all") {
-      setFilteredProducts(initialProducts);
-    } else {
-      setFilteredProducts(
-        initialProducts.filter((product) => product.category === selectedCategory)
-      );
+    let products = initialProducts;
+    
+    // Filter by category
+    if (selectedCategory !== "all") {
+      products = products.filter((product) => product.category === selectedCategory);
     }
-  }, [selectedCategory, initialProducts]);
+    
+    // Filter by favorites - use favorites array directly to avoid function dependency
+    if (showFavoritesOnly) {
+      const favoriteIds = favorites.map(f => f.id);
+      products = products.filter((product) => favoriteIds.includes(product.id));
+    }
+    
+    setFilteredProducts(products);
+  }, [selectedCategory, initialProducts, showFavoritesOnly, favorites]);
 
   const categories: { value: Category; label: string }[] = [
     { value: "all", label: "All Products" },
@@ -52,9 +68,66 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
         </div>
       </div>
 
+      {/* Favorites Link and Toggle */}
+      {mounted && (
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Favorites Link */}
+            <Link
+              href="/favorites"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/30 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <svg
+                className="w-5 h-5 fill-red-500 text-red-500"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                My Favorites
+              </span>
+              {favoritesCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-bold">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* Show Favorites Only Toggle */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              Show Favorites Only
+            </span>
+            <button
+              onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer ${
+                showFavoritesOnly
+                  ? "bg-gradient-to-r from-indigo-600 to-purple-600"
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+              aria-label="Toggle show favorites only"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                  showFavoritesOnly ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Product Count */}
       <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
         Showing {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+        {showFavoritesOnly && " from favorites"}
       </p>
 
       {/* Products Grid */}
@@ -79,6 +152,35 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-medium">
                   {product.category}
                 </div>
+                {/* Favorite Button */}
+                {mounted && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleFavorite(product);
+                    }}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 dark:bg-gray-800/80 cursor-pointer"
+                    aria-label={isFavorite(product.id) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <svg
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        isFavorite(product.id)
+                          ? "fill-red-500 text-red-500"
+                          : "fill-none text-gray-600 dark:text-gray-300"
+                      }`}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
 
               {/* Product Info */}
