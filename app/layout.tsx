@@ -28,8 +28,12 @@ export const metadata: Metadata = {
     title: "Product Explorer Dashboard",
     description: "Discover and explore amazing products with our comprehensive dashboard",
   },
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
