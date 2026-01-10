@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getProductById } from "../../../lib/api/products";
 import ProductDetails from "@/components/ProductDetails";
 
-
+// Force dynamic rendering to avoid build-time API calls
+export const dynamic = 'force-dynamic';
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
