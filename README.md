@@ -54,6 +54,7 @@ A modern, feature-rich product catalog application built with Next.js 15, featur
 - **UI Library:** [React 19.2.3](https://react.dev/)
 - **Language:** [TypeScript 5](https://www.typescriptlang.org/)
 - **Styling:** [TailwindCSS 4](https://tailwindcss.com/)
+- **State Management:** [TanStack Query (React Query) 5.x](https://tanstack.com/query)
 - **HTTP Client:** [Axios 1.7.9](https://axios-http.com/)
 - **Testing:** [Jest 30.2.0](https://jestjs.io/) + [React Testing Library 16.3.1](https://testing-library.com/react)
 - **API:** [FakeStore API](https://fakestoreapi.com/)

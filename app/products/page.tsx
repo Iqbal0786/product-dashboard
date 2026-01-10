@@ -1,34 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getAllProducts } from '../../lib/api/products';
 import ProductGrid from '../../components/ProductGrid';
-import { Product } from '../types/product';
+import { useProducts } from '../../hooks/useProductQueries';
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAllProducts();
-        setProducts(data);
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : 'Failed to load products';
-        setError(errorMessage);
-        console.error('Error loading products:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  const { data: products = [], isLoading, error, refetch } = useProducts();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900">
@@ -67,7 +44,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Loading State */}
-          {loading && (
+          {isLoading && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="relative w-16 h-16 mb-4">
                 <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-200 dark:border-indigo-800 rounded-full"></div>
@@ -80,7 +57,7 @@ export default function ProductsPage() {
           )}
 
           {/* Error Message */}
-          {error && !loading && (
+          {error && !isLoading && (
             <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-start gap-3">
                 <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,14 +68,14 @@ export default function ProductsPage() {
                     Unable to Load Products
                   </h3>
                   <p className="text-red-700 dark:text-red-400">
-                    {error}
+                    {error instanceof Error ? error.message : 'An error occurred'}
                   </p>
                   <p className="text-sm text-red-600 dark:text-red-500 mt-2">
-                    Please try refreshing the page or check back later.
+                    Please try again or check back later.
                   </p>
                   <button
-                    onClick={() => window.location.reload()}
-                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    onClick={() => refetch()}
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
                   >
                     Retry
                   </button>
@@ -108,7 +85,7 @@ export default function ProductsPage() {
           )}
 
           {/* Product Grid Component */}
-          {!loading && !error && <ProductGrid initialProducts={products} />}
+          {!isLoading && !error && <ProductGrid initialProducts={products} />}
         </div>
       </div>
     </div>

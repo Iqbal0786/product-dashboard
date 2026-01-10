@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.16",
     "axios": "^1.13.2",
     "next": "16.1.1",
     "react": "19.2.3",

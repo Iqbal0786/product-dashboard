@@ -1,76 +1,17 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getProductById } from "../../../lib/api/products";
-import ProductDetails from "@/components/ProductDetails";
+'use client';
 
-// Force dynamic rendering to avoid build-time API calls
-export const dynamic = 'force-dynamic';
+import { use } from 'react';
+import Link from 'next/link';
+import ProductDetails from '@/components/ProductDetails';
+import { useProduct } from '../../../hooks/useProductQueries';
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const { id } = await params;
-  
-  try {
-    const product = await getProductById(id);
-
-    if (!product) {
-      return {
-        title: "Product Not Found",
-      };
-    }
-
-    return {
-      title: `${product.title} | Product Explorer Dashboard`,
-      description: product.description.substring(0, 160),
-      keywords: [product.category, product.title, "buy online", "e-commerce"],
-      openGraph: {
-        title: product.title,
-        description: product.description.substring(0, 160),
-        images: [
-          {
-            url: product.image,
-            width: 800,
-            height: 800,
-            alt: product.title,
-          },
-        ],
-        type: "website",
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: product.title,
-        description: product.description.substring(0, 160),
-        images: [product.image],
-      },
-    };
-  } catch (error) {
-    console.error('Error generating metadata:', error);
-    return {
-      title: "Product | Product Explorer Dashboard",
-      description: "View product details",
-    };
-  }
-}
-
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params;
-  let product = null;
-  let error = null;
-
-  try {
-    product = await getProductById(id);
-  } catch (e) {
-    error = e instanceof Error ? e.message : 'Failed to load product';
-    console.error('Error loading product:', e);
-  }
-
-  if (!product && !error) {
-    notFound();
-  }
+export default function ProductPage({ params }: ProductPageProps) {
+  const { id } = use(params);
+  const { data: product, isLoading, error, refetch } = useProduct(id);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900">
@@ -103,8 +44,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
             Back to Products
           </Link>
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="relative w-16 h-16 mb-4">
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-200 dark:border-indigo-800 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-600 dark:border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
+                Loading product details...
+              </p>
+            </div>
+          )}
+
           {/* Error Message */}
-          {error && (
+          {error && !isLoading && (
             <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-start gap-3">
                 <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,18 +69,49 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     Unable to Load Product
                   </h3>
                   <p className="text-red-700 dark:text-red-400">
-                    {error}
+                    {error instanceof Error ? error.message : 'An error occurred'}
                   </p>
                   <p className="text-sm text-red-600 dark:text-red-500 mt-2">
-                    Please try refreshing the page or check back later.
+                    Please try again or check back later.
                   </p>
+                  <button
+                    onClick={() => refetch()}
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Not Found */}
+          {!isLoading && !error && !product && (
+            <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
+                    Product Not Found
+                  </h3>
+                  <p className="text-yellow-700 dark:text-yellow-400">
+                    The product you're looking for doesn't exist.
+                  </p>
+                  <Link
+                    href="/products"
+                    className="mt-4 inline-block px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                  >
+                    Browse All Products
+                  </Link>
                 </div>
               </div>
             </div>
           )}
 
           {/* Product Details */}
-          {product && <ProductDetails product={product} />}
+          {!isLoading && !error && product && <ProductDetails product={product} />}
         </div>
       </div>
     </div>
