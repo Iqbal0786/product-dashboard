@@ -22,7 +22,7 @@ export default function FavoritesPage() {
           {/* Header */}
           <div className="mb-8">
             <Link
-              href="/"
+              href="/products"
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-4"
             >
               <svg
@@ -38,7 +38,7 @@ export default function FavoritesPage() {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              Back to Home
+              Back to Products List
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
               My Favorites
