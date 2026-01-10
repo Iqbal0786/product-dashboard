@@ -10,34 +10,6 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-pink-300/20 blur-3xl animate-pulse delay-500 dark:bg-pink-600/10"></div>
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-10 px-6 py-6 md:px-12">
-        <div className="mx-auto max-w-7xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">PE</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
-              Product Explorer
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/favorites"
-              className="hidden md:block px-6 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 font-medium shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 dark:bg-gray-800/80 dark:text-white"
-            >
-              ❤️ Favorites
-            </Link>
-            <Link
-              href="/products"
-              className="hidden md:block px-6 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 font-medium shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 dark:bg-gray-800/80 dark:text-white"
-            >
-              Browse Products
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <main className="relative z-10 px-6 md:px-12">
         <div className="mx-auto max-w-7xl">
