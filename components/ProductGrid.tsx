@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product, Category } from "../app/types/product";
 import { useFavorites } from "../hooks/useFavorites";
 import { useDebounce } from "../hooks/useDebounce";
+import Pagination from "./Pagination";
 
 interface ProductGridProps {
   initialProducts: Product[];
 }
+
+type SortOption = "default" | "price-asc" | "price-desc";
 
 export default function ProductGrid({ initialProducts }: ProductGridProps) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts);
@@ -19,11 +22,19 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Handle client-side hydration
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, debouncedSearchQuery, showFavoritesOnly, sortBy]);
 
   useEffect(() => {
     let products = initialProducts;
@@ -47,8 +58,16 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
       products = products.filter((product) => favoriteIds.includes(product.id));
     }
     
-    setFilteredProducts(products);
-  }, [selectedCategory, initialProducts, showFavoritesOnly, favorites, debouncedSearchQuery]);
+    // Apply sorting
+    let sortedProducts = [...products];
+    if (sortBy === "price-asc") {
+      sortedProducts.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-desc") {
+      sortedProducts.sort((a, b) => b.price - a.price);
+    }
+    
+    setFilteredProducts(sortedProducts);
+  }, [selectedCategory, initialProducts, showFavoritesOnly, favorites, debouncedSearchQuery, sortBy]);
 
   const categories: { value: Category; label: string }[] = [
     { value: "all", label: "All Products" },
@@ -57,6 +76,35 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
     { value: "jewelery", label: "Jewelery" },
     { value: "electronics", label: "Electronics" },
   ];
+
+  // Memoized pagination calculations
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredProducts.length / itemsPerPage);
+  }, [filteredProducts.length, itemsPerPage]);
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  const productCountText = useMemo(() => {
+    const totalProducts = filteredProducts.length;
+    const startIndex = (currentPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPage * itemsPerPage, totalProducts);
+
+    if (totalProducts === 0) {
+      return "No products found";
+    }
+
+    return `Showing ${startIndex}-${endIndex} of ${totalProducts} ${
+      totalProducts === 1 ? "product" : "products"
+    }${showFavoritesOnly ? " from favorites" : ""}`;
+  }, [filteredProducts.length, currentPage, itemsPerPage, showFavoritesOnly]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
 
   return (
     <>
@@ -163,15 +211,34 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
         </div>
       )}
 
-      {/* Product Count */}
-      <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-        Showing {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
-        {showFavoritesOnly && " from favorites"}
-      </p>
+      {/* Sort and Product Count */}
+      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Sort Dropdown */}
+        <div className="flex items-center gap-3">
+          <label htmlFor="sort" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Sort by:
+          </label>
+          <select
+            id="sort"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/30 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all duration-300 cursor-pointer"
+          >
+            <option value="default">Default</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+
+        {/* Product Count */}
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          {productCountText}
+        </p>
+      </div>
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map((product) => (
+        {paginatedProducts.map((product) => (
           <Link
             key={product.id}
             href={`/products/${product.id}`}
@@ -265,6 +332,16 @@ export default function ProductGrid({ initialProducts }: ProductGridProps) {
           </Link>
         ))}
       </div>
+
+
+      {/* Pagination Controls */}
+      {filteredProducts.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
 
       {/* Empty State */}
       {filteredProducts.length === 0 && (
