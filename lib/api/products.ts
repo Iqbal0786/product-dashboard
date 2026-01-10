@@ -1,6 +1,16 @@
+import axios, { AxiosError } from "axios";
 import { Product } from "../../app/types/product";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fakestoreapi.com";
+
+// Create axios instance with default config
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000, // 10 seconds timeout
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 /**
  * Fetch all products from the API
@@ -9,16 +19,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fakestoreapi.co
  */
 export async function getAllProducts(): Promise<Product[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await apiClient.get<Product[]>("/products");
+    return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
+    
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response) {
+        throw new Error(`Failed to fetch products: ${axiosError.response.status} ${axiosError.response.statusText}`);
+      } else if (axiosError.request) {
+        throw new Error("Failed to load products. No response from server.");
+      }
+    }
+    
     throw new Error("Failed to load products. Please try again later.");
   }
 }
@@ -31,20 +45,26 @@ export async function getAllProducts(): Promise<Product[]> {
  */
 export async function getProductById(id: string | number): Promise<Product | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch product: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await apiClient.get<Product>(`/products/${id}`);
+    return response.data;
   } catch (error) {
     console.error(`Error fetching product ${id}:`, error);
+    
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      
+      // Return null for 404 errors (product not found)
+      if (axiosError.response?.status === 404) {
+        return null;
+      }
+      
+      if (axiosError.response) {
+        throw new Error(`Failed to fetch product: ${axiosError.response.status} ${axiosError.response.statusText}`);
+      } else if (axiosError.request) {
+        throw new Error("Failed to load product details. No response from server.");
+      }
+    }
+    
     throw new Error("Failed to load product details. Please try again later.");
   }
 }
@@ -55,16 +75,11 @@ export async function getProductById(id: string | number): Promise<Product | nul
  */
 export async function getCategories(): Promise<string[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/categories`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await apiClient.get<string[]>("/products/categories");
+    return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
+    
     // Return default categories as fallback
     return ["men's clothing", "women's clothing", "jewelery", "electronics"];
   }

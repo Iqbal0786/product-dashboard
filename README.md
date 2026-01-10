@@ -54,6 +54,7 @@ A modern, feature-rich product catalog application built with Next.js 15, featur
 - **UI Library:** [React 19.2.3](https://react.dev/)
 - **Language:** [TypeScript 5](https://www.typescriptlang.org/)
 - **Styling:** [TailwindCSS 4](https://tailwindcss.com/)
+- **HTTP Client:** [Axios 1.7.9](https://axios-http.com/)
 - **Testing:** [Jest 30.2.0](https://jestjs.io/) + [React Testing Library 16.3.1](https://testing-library.com/react)
 - **API:** [FakeStore API](https://fakestoreapi.com/)
 
@@ -195,9 +196,11 @@ The app fetches data from the [FakeStore API](https://fakestoreapi.com/):
 - `GET /products/categories` - Fetch all categories
 
 API functions include:
-- Error handling with user-friendly messages
-- Next.js caching with revalidation (1 hour for products, 24 hours for categories)
-- TypeScript type safety
+- **Axios HTTP client** for robust request handling
+- **10-second timeout** to prevent hanging requests
+- **Comprehensive error handling** with user-friendly messages
+- **Automatic JSON parsing** of responses
+- **TypeScript type safety** with typed responses
 
 ## 🎯 Key Components
 
