@@ -9,9 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fakestoreapi.co
  */
 export async function getAllProducts(): Promise<Product[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+    const response = await fetch(`${API_BASE_URL}/products`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
@@ -33,9 +31,7 @@ export async function getAllProducts(): Promise<Product[]> {
  */
 export async function getProductById(id: string | number): Promise<Product | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+    const response = await fetch(`${API_BASE_URL}/products/${id}`);
 
     if (response.status === 404) {
       return null;
@@ -59,9 +55,7 @@ export async function getProductById(id: string | number): Promise<Product | nul
  */
 export async function getCategories(): Promise<string[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/categories`, {
-      next: { revalidate: 86400 }, // Revalidate every 24 hours
-    });
+    const response = await fetch(`${API_BASE_URL}/products/categories`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
