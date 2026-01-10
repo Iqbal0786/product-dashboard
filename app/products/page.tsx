@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { getAllProducts } from "../../lib/api/products";
 import ProductGrid from "../../components/ProductGrid";
+import { Product } from "../types/product";
 
 export const metadata: Metadata = {
   title: "Product Catalog | Product Explorer Dashboard",
@@ -18,7 +19,15 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function ProductsPage() {
-  const products = await getAllProducts();
+  let products: Product[] = [];
+  let error: string | null = null;
+
+  try {
+    products = await getAllProducts();
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Failed to load products';
+    console.error('Error loading products:', e);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900">
@@ -56,8 +65,30 @@ export default async function ProductsPage() {
             </h1>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-1">
+                    Unable to Load Products
+                  </h3>
+                  <p className="text-red-700 dark:text-red-400">
+                    {error}
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-500 mt-2">
+                    Please try refreshing the page or check back later.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Product Grid Component (Client) */}
-          <ProductGrid initialProducts={products} />
+          {!error && <ProductGrid initialProducts={products} />}
         </div>
       </div>
     </div>

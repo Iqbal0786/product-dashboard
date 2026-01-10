@@ -13,45 +13,62 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProductById(id);
+  
+  try {
+    const product = await getProductById(id);
 
-  if (!product) {
+    if (!product) {
+      return {
+        title: "Product Not Found",
+      };
+    }
+
     return {
-      title: "Product Not Found",
+      title: `${product.title} | Product Explorer Dashboard`,
+      description: product.description.substring(0, 160),
+      keywords: [product.category, product.title, "buy online", "e-commerce"],
+      openGraph: {
+        title: product.title,
+        description: product.description.substring(0, 160),
+        images: [
+          {
+            url: product.image,
+            width: 800,
+            height: 800,
+            alt: product.title,
+          },
+        ],
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: product.title,
+        description: product.description.substring(0, 160),
+        images: [product.image],
+      },
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: "Product | Product Explorer Dashboard",
+      description: "View product details",
     };
   }
-
-  return {
-    title: `${product.title} | Product Explorer Dashboard`,
-    description: product.description.substring(0, 160),
-    keywords: [product.category, product.title, "buy online", "e-commerce"],
-    openGraph: {
-      title: product.title,
-      description: product.description.substring(0, 160),
-      images: [
-        {
-          url: product.image,
-          width: 800,
-          height: 800,
-          alt: product.title,
-        },
-      ],
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: product.title,
-      description: product.description.substring(0, 160),
-      images: [product.image],
-    },
-  };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = await getProductById(id);
+  let product = null;
+  let error = null;
 
-  if (!product) {
+  try {
+    product = await getProductById(id);
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Failed to load product';
+    console.error('Error loading product:', e);
+  }
+
+  if (!product && !error) {
     notFound();
   }
 
@@ -85,7 +102,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </svg>
             Back to Products
           </Link>
-          <ProductDetails product={product} />
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-1">
+                    Unable to Load Product
+                  </h3>
+                  <p className="text-red-700 dark:text-red-400">
+                    {error}
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-500 mt-2">
+                    Please try refreshing the page or check back later.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Product Details */}
+          {product && <ProductDetails product={product} />}
         </div>
       </div>
     </div>
