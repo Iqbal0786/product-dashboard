@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import ProductGrid from '../../components/ProductGrid';
+import ProductGrid from '../../components/products/ProductGrid';
 import { useProducts } from '../../hooks/useProductQueries';
 
 export default function ProductsPage() {

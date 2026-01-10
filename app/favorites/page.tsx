@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import FavoritesList from "../../components/FavoritesList";
+import FavoritesList from "../../components/products/FavoritesList";
 
 export const metadata: Metadata = {
   title: "My Favorites | Product Explorer Dashboard",

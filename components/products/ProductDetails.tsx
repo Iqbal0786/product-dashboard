@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Product } from "../app/types/product";
-import { useFavorites } from "../hooks/useFavorites";
+import { Product } from "@/types/product";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface ProductDetailsProps {
   product: Product;

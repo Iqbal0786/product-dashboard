@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProductGrid from '@/components/ProductGrid';
-import { Product } from '@/app/types/product';
+import { Product } from '@/types/product';
 
 // Mock the custom hooks
 const mockFavorites: Product[] = [];

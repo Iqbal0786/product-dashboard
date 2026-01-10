@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProductDetails from '@/components/ProductDetails';
-import { Product } from '@/app/types/product';
+import { Product } from '@/types/product';
 
 // Mock the useFavorites hook
 const mockToggleFavorite = jest.fn();

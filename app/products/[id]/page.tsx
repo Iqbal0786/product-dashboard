@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import Link from 'next/link';
-import ProductDetails from '@/components/ProductDetails';
+import ProductDetails from '@/components/products/ProductDetails';
 import { useProduct } from '../../../hooks/useProductQueries';
 
 interface ProductPageProps {

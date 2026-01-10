@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useFavorites } from "../hooks/useFavorites";
+import { useFavorites } from "@/hooks/useFavorites";
+
 
 export default function FavoritesList() {
-  const { favorites, favoritesCount, removeFromFavorites, isFavorite } = useFavorites();
+  const { favorites, favoritesCount, removeFromFavorites } = useFavorites();
 
   if (favoritesCount === 0) {
     return (

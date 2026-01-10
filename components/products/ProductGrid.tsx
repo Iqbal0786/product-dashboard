@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Product, Category } from "../app/types/product";
-import { useFavorites } from "../hooks/useFavorites";
-import { useDebounce } from "../hooks/useDebounce";
-import Pagination from "./Pagination";
+import { Product } from "../../types/product";
+import { useFavorites } from "../../hooks/useFavorites";
+import { useDebounce } from "../../hooks/useDebounce";
+import Pagination from "../ui/Pagination";
 
 interface ProductGridProps {
   initialProducts: Product[];
 }
 
+type Category = "all" | "men's clothing" | "women's clothing" | "jewelery" | "electronics";
 type SortOption = "default" | "price-asc" | "price-desc";
 
 export default function ProductGrid({ initialProducts }: ProductGridProps) {

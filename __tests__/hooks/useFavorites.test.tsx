@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useFavorites } from '@/hooks/useFavorites';
-import { Product } from '@/app/types/product';
+import { Product } from '@/types/product';
 
 // Mock localStorage
 const localStorageMock = (() => {
