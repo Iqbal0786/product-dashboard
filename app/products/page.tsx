@@ -1,33 +1,34 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import { getAllProducts } from "../../lib/api/products";
-import ProductGrid from "../../components/ProductGrid";
-import { Product } from "../types/product";
+'use client';
 
-export const metadata: Metadata = {
-  title: "Product Catalog | Product Explorer Dashboard",
-  description: "Browse our complete collection of products including men's clothing, women's clothing, jewelry, and electronics. Find the perfect product for you.",
-  keywords: ["products", "catalog", "shopping", "e-commerce", "clothing", "electronics", "jewelry"],
-  openGraph: {
-    title: "Product Catalog | Product Explorer Dashboard",
-    description: "Browse our complete collection of products",
-    type: "website",
-  },
-};
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { getAllProducts } from '../../lib/api/products';
+import ProductGrid from '../../components/ProductGrid';
+import { Product } from '../types/product';
 
-// Force dynamic rendering to avoid build-time API calls
-export const dynamic = 'force-dynamic';
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function ProductsPage() {
-  let products: Product[] = [];
-  let error: string | null = null;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getAllProducts();
+        setProducts(data);
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : 'Failed to load products';
+        setError(errorMessage);
+        console.error('Error loading products:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  try {
-    products = await getAllProducts();
-  } catch (e) {
-    error = e instanceof Error ? e.message : 'Failed to load products';
-    console.error('Error loading products:', e);
-  }
+    fetchProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900">
@@ -65,8 +66,21 @@ export default async function ProductsPage() {
             </h1>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="relative w-16 h-16 mb-4">
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-200 dark:border-indigo-800 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-600 dark:border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
+                Loading products...
+              </p>
+            </div>
+          )}
+
           {/* Error Message */}
-          {error && (
+          {error && !loading && (
             <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-start gap-3">
                 <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,13 +96,19 @@ export default async function ProductsPage() {
                   <p className="text-sm text-red-600 dark:text-red-500 mt-2">
                     Please try refreshing the page or check back later.
                   </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Retry
+                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Product Grid Component (Client) */}
-          {!error && <ProductGrid initialProducts={products} />}
+          {/* Product Grid Component */}
+          {!loading && !error && <ProductGrid initialProducts={products} />}
         </div>
       </div>
     </div>
